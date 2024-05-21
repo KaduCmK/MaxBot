@@ -1,1 +1,4 @@
 userdata/
+.venv/
+src/__pycache__/
+canvas.png
