@@ -4,8 +4,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.common.exceptions import NoSuchElementException
 import chromedriver_autoinstaller
 import pathlib
+import os
 import base64
 
 
@@ -24,7 +26,7 @@ class Scraper:
 
         options = Options()
         options.add_argument('--headful')
-        options.add_argument(f'user-data-dir={pathlib.Path().absolute()}\\userdata')
+        options.add_argument(f'user-data-dir={os.path.join(pathlib.Path().absolute(), "userdata")}')
         options.add_experimental_option('detach', True)
 
         self.driver = webdriver.Chrome(options=options)
@@ -117,8 +119,34 @@ class Scraper:
             scroll += 600
             sleep(1)
 
-        scroll = 0
+        contatos.discard('Arquivadas')
         print(f'{len(contatos)} contatos coletados')
         print(contatos)
 
         return contatos
+    
+    def enviarMensagem(self, contatos: set[str], msg: str) -> None:
+        painel = self.wait.until(ec.visibility_of_element_located((By.ID, "pane-side")))
+        
+        for contato in contatos:
+            print(f'Clicando em {contato}...')
+            scroll = 0
+            clickable = None
+            
+            while clickable == None:
+                self.driver.execute_script(f'arguments[0].scrollTop = {scroll}', painel)
+                try:
+                    clickable = self.driver.find_element(By.XPATH, f'//span[text()="{contato}"]')
+                    print(f'{contato} encontrado')
+                except NoSuchElementException:
+                    print('Rolando...')
+                    scroll += 600
+                    sleep(1)
+                
+            clickable.click()
+            sleep(2)
+        
+        
+        # input = self.driver.find_element(By.CSS_SELECTOR, 'p.selectable-text.copyable-text')
+        
+        print(input)

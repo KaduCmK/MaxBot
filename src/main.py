@@ -4,4 +4,6 @@ sc = Scraper()
 
 sc.authenticateWithQRCode()
 
-print(sc.coletarContatos(20))
+contatos = sc.coletarContatos(2)
+
+sc.enviarMensagem(contatos, "abc")
