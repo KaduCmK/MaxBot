@@ -1,0 +1,11 @@
+from enum import Enum
+
+
+class Status(Enum):
+    IDLE = 0
+    CARREGANDO_QR = 1
+    AGUARDANDO_AUTENTICACAO = 2
+    CARREGANDO_CONVERSAS = 3
+    COLETANDO_ETIQUETAS = 4
+    COLETANDO_CONTATOS = 5
+    ENVIANDO_MENSAGENS = 6
