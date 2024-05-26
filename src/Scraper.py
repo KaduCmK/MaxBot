@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 
 from Status import Status
 
@@ -175,6 +176,13 @@ class Scraper:
                         clickable.click()
                         visible = True
                         print(f'{contato} encontrado')
+                        
+                        # pesquisar contato e escrever mensagem usam as mesmas classes, por isso retornar lista
+                        input = self.driver.find_elements(
+                            By.CSS_SELECTOR, 'p.selectable-text.copyable-text.x15bjb6t.x1n2onr6'
+                            )[1]
+                        input.send_keys(msg)
+                        input.send_keys(Keys.ENTER)
                     except:
                         print('Rolando...')
                         self.driver.execute_script(f'arguments[0].scrollTop = {scroll}', painel)
@@ -187,7 +195,6 @@ class Scraper:
 
         return erros
 
-        # input = self.driver.find_element(By.CSS_SELECTOR, 'p.selectable-text.copyable-text')
 
     def getScraperStatus(self) -> int:
         """
