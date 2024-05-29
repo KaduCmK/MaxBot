@@ -5,7 +5,7 @@ from kivy.uix.label import Label
 # from kivy.uix.image import Image
 # from kivy.uix.textinput import TextInput
 # from kivy.uix.button import Button
-# from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.boxlayout import BoxLayout
 # from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import ObjectProperty, StringProperty
 
@@ -17,7 +17,7 @@ Deixar configurações de design para o arquivo KV
 
 
 # class QRcode(ModalView):
-#     def 
+#     def
 
 
 class Authentication_Screen(Widget):        
@@ -48,9 +48,19 @@ class Main_Screen(Widget):
     # botão de interação
 
     def build(self):
-        message = Label(text="Main Screen")
-        message = Label(text="Just testing...")
-        return message
+        boxes = BoxLayout(orientation='vertical')
+        upper = BoxLayout(orientation='horizontal')
+        lower = BoxLayout(orientation='vertical')
+        
+        upper.add_widget(Label(text="caixa de texto"))
+        upper.add_widget(Label(text="etiquetas e menu"))
+        lower.add_widget(Label(text="texto de progresso"))
+        lower.add_widget(Label(text="barra de progresso"))
+        lower.add_widget(Label(text="botoes"))
+        
+        boxes.add_widget(upper)
+        boxes.add_widget(lower)
+        return boxes
 
 
 class MaxBot(App):
