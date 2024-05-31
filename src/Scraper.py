@@ -182,7 +182,7 @@ class Scraper:
                             By.CSS_SELECTOR, 'p.selectable-text.copyable-text.x15bjb6t.x1n2onr6'
                             )[1]
                         input.send_keys(msg)
-                        input.send_keys(Keys.ENTER)
+                        # input.send_keys(Keys.ENTER)
                     except:
                         print('Rolando...')
                         self.driver.execute_script(f'arguments[0].scrollTop = {scroll}', painel)

@@ -8,4 +8,4 @@ sc.authenticateWithQRCode()
 
 contatos = sc.coletarContatos(5)
 
-print(f'erros: {sc.enviarMensagem(contatos, "abc")}')
+# print(f'erros: {sc.enviarMensagem(contatos, "abc")}')
