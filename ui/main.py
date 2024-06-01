@@ -1,15 +1,14 @@
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.stacklayout import StackLayout
 from kivy.uix.progressbar import ProgressBar
 from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.graphics import Color, Rectangle
 from kivy.properties import StringProperty
 
@@ -41,17 +40,23 @@ class TextBox(BoxLayout):
     def build(self):
         scroll_box = ScrollView(size_hint=(1, 1))
         scroll_box.bind(size=self.update_rect, pos=self.update_rect)
-        self.text_display = Label(text=self.message, size_hint=(1, None), text_size=(600, None), color=(0,0,0,1))
 
         with scroll_box.canvas.before:
             Color(1,1,1,1)
             self.rectangle = Rectangle(size=scroll_box.size, pos=scroll_box.pos)
 
+        self.text_display = Label(
+            text=self.message, 
+            size_hint=(1, None),
+            color=(0,0,0,1),
+            valign='top'
+        )
+        self.text_display.bind(texture_size=self.update_height)
 
         button = Button(
             text="Editar mensagem", 
             size_hint=(None, None), 
-            width=150, 
+            width=200, 
             height=44, 
             pos_hint={'center_x': 0.5}
         )
@@ -61,9 +66,14 @@ class TextBox(BoxLayout):
         self.add_widget(scroll_box)
         self.add_widget(button)
 
-    def update_rect(self, instance,*args):
+    def update_height(self, instance, value):
+        instance.height = instance.texture_size[1]
+
+    def update_rect(self, instance: ScrollView, value):
+        size = (instance.size[0]-10, instance.size[1])
         self.rectangle.size = instance.size
         self.rectangle.pos = instance.pos
+        self.text_display.text_size = size
 
     def call_editor(self, instance):
         edit_text(self)
@@ -73,26 +83,40 @@ class TextBox(BoxLayout):
         self.text_display.text = self.message
 
 
-class TagMenu(Spinner):
+class TagMenu(StackLayout):
     def __init__(self, **kwargs):
-        super(TagMenu, self).__init__(
+        super(TagMenu, self).__init__(orientation='tb-lr', size_hint=(0.3,1))
+        self.build()
+
+    def build(self):
+        updater = Button(
+            text='Atualizar etiquetas',
+            size_hint=(1,None),
+            size=(200,44),
+            pos_hint={'top': 1, 'center_x': .5}
+        )
+        print(self.top)
+
+        menu = Spinner(
             text="Etiquetas",
             values=self.tags(),
-            size_hint=(0.3, None),
+            size_hint=(1,None),
             size=(200, 44),
-            pos_hint={'center_y': 0.9}, 
-            **kwargs
+            pos_hint={'top': .9}
         )
 
+        self.add_widget(updater)
+        self.add_widget(menu)
+
     def tags(self):
-        values = ("Tag 1", "Tag 2", "Tag 3", "Tag 4")
+        values = ("Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5")
         return values
 
 
 class ProgressInfo(BoxLayout):
     max = 100
     current = 0
-    current_status = StringProperty("Loading")
+    current_status = StringProperty("Carregando")
 
     def __init__(self, **kwargs):
         super(ProgressInfo, self).__init__(orientation='vertical', padding=10, spacing=10, size_hint=(1,0.4), **kwargs)
@@ -111,7 +135,12 @@ class ProgressInfo(BoxLayout):
             value_normalized=0.65
         )
 
-        enviar = Button(text="Enviar")
+        enviar = Button(
+            text="Enviar",
+            size_hint=(None,None),
+            size=(100,44),
+            pos_hint={'center_x': .5}
+        )
 
         self.add_widget(status)
         self.add_widget(progress)

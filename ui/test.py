@@ -39,12 +39,19 @@ class TextBox(BoxLayout):
 
     def build(self):
         scroll_box = ScrollView(size_hint=(1, 1))
-        scroll_box.bind(size=self.update_rect, pos=self.update_rect)
-        self.text_display = Label(text=self.message, size_hint=(1, None), text_size=(600, None), color=(0,0,0,1))
+        self.text_display = Label(
+            text=self.message, 
+            size_hint=(1, None), 
+            text_size=(600, None),
+            color=(0,0,0,1), 
+            valign='top'
+        )
+        self.text_display.bind(texture_size=self.update_height)
 
-        with scroll_box.canvas.before:
+        with self.text_display.canvas.before:
             Color(1, 1, 1, 1)  # Set the color to white
-            self.rect = Rectangle(size=scroll_box.size, pos=scroll_box.pos)
+            self.rect = Rectangle(size=self.text_display.size, pos=self.text_display.pos)
+            self.text_display.bind(size=self.update_rect, pos=self.update_rect)
 
         button = Button(text="Editar mensagem", size_hint=(None, None), width=150, height=44, pos_hint={'center_x': 0.5})
         button.bind(on_release=self.call_editor)
@@ -53,7 +60,11 @@ class TextBox(BoxLayout):
         self.add_widget(scroll_box)
         self.add_widget(button)
 
-    def update_rect(self, instance,*args):
+    def update_height(self, instance, value):
+        instance.height = instance.texture_size[1]
+        self.update_rect(instance, value)
+
+    def update_rect(self, instance, value):
         self.rect.size = instance.size
         self.rect.pos = instance.pos
 
@@ -130,8 +141,12 @@ def edit_text(parent):
 
     editor = Popup(title='Editor', content=content, size_hint=(None, None), size=(300, 400), auto_dismiss=False)
 
+    def save(self):
+        parent.update(box.text)
+        editor.dismiss()
+
     cancel.bind(on_press=editor.dismiss)
-    update.bind(on_press=lambda x: parent.update(box.text))
+    update.bind(on_press=save)
 
     editor.open()
 
