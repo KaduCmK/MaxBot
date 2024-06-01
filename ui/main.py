@@ -3,6 +3,7 @@ from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
+from kivy.uix.modalview import ModalView
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
@@ -14,7 +15,18 @@ from kivy.properties import StringProperty
 
 
 class MaxBot(App):
+    """
+    **Classe Principal\n**
+
+    Instancia a árvore de widgets do aplicativo
+    """
     def build(self):
+        """
+        Construtor da árvore de widgets do aplicativo
+
+        :return: raíz da árvore de widgets
+        """
+
         screen = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         upper = BoxLayout(orientation='horizontal', padding=10, spacing=10)
@@ -24,20 +36,30 @@ class MaxBot(App):
         screen.add_widget(upper)
         screen.add_widget(ProgressInfo())
 
-        window = AnchorLayout(anchor_x='center', anchor_y='center')
+        # window = AnchorLayout(anchor_x='center', anchor_y='center')
+        window = ModalView(background='background_image.png')
         window.add_widget(screen)
 
         return window
 
 
 class TextBox(BoxLayout):
-    message = StringProperty("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam a aliquam odio. Quisque ultrices purus ipsum, id dignissim quam feugiat in. Pellentesque id purus non urna volutpat vehicula. Integer turpis odio, viverra at massa vel, feugiat fermentum velit. Duis quis lacus scelerisque, dictum nibh vitae, facilisis lorem. Nulla vestibulum tincidunt ante vel tincidunt. Suspendisse at iaculis est. \n\nSed vitae quam fringilla, auctor tellus vel, volutpat mi. Sed rhoncus mi et ex tincidunt sagittis. In id est nec leo auctor ullamcorper quis a tortor. Nam tristique, nunc at pretium ultrices, lorem nisl cursus velit, eu consequat diam nulla id enim. Aliquam consectetur feugiat tellus, quis vehicula orci ultricies id. Proin nec leo at velit consectetur bibendum. Maecenas in nibh sodales, elementum eros vel, facilisis augue. Integer gravida libero nec leo cursus fermentum. Phasellus volutpat ullamcorper convallis. In euismod risus faucibus mollis accumsan. Donec sed orci ut nisl ullamcorper convallis. Vestibulum bibendum condimentum elit ac aliquam.")
+    """
+    Classe criadora do campo de mensagem
+    """
 
+    # variével q guarda a mensagem atual
+    message = StringProperty("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam a aliquam odio. Quisque ultrices purus ipsum, id dignissim quam feugiat in. Pellentesque id purus non urna volutpat vehicula. Integer turpis odio, viverra at massa vel, feugiat fermentum velit. Duis quis lacus scelerisque, dictum nibh vitae, facilisis lorem. Nulla vestibulum tincidunt ante vel tincidunt. Suspendisse at iaculis est. \n\nSed vitae quam fringilla, auctor tellus vel, volutpat mi. Sed rhoncus mi et ex tincidunt sagittis. In id est nec leo auctor ullamcorper quis a tortor. Nam tristique, nunc at pretium ultrices, lorem nisl cursus velit, eu consequat diam nulla id enim. Aliquam consectetur feugiat tellus, quis vehicula orci ultricies id. Proin nec leo at velit consectetur bibendum. Maecenas in nibh sodales, elementum eros vel, facilisis augue. Integer gravida libero nec leo cursus fermentum. Phasellus volutpat ullamcorper convallis. In euismod risus faucibus mollis accumsan. Donec sed orci ut nisl ullamcorper convallis. Vestibulum bibendum condimentum elit ac aliquam.")
+    
     def __init__(self, **kwargs):
         super(TextBox, self).__init__(orientation='vertical', spacing=10, **kwargs)
         self.build()
 
     def build(self):
+        '''
+        Construtor da classe TextBox
+        '''
+
         scroll_box = ScrollView(size_hint=(1, 1))
         scroll_box.bind(size=self.update_rect, pos=self.update_rect)
 
@@ -84,6 +106,10 @@ class TextBox(BoxLayout):
 
 
 class TagMenu(StackLayout):
+    """
+    Classe criadora do menu de etiquetas
+    """
+
     def __init__(self, **kwargs):
         super(TagMenu, self).__init__(orientation='tb-lr', size_hint=(0.3,1))
         self.build()
@@ -114,6 +140,10 @@ class TagMenu(StackLayout):
 
 
 class ProgressInfo(BoxLayout):
+    """
+    Classe criadora da área de progresso e botão de enviar
+    """
+
     max = 100
     current = 0
     current_status = StringProperty("Carregando")
@@ -123,6 +153,10 @@ class ProgressInfo(BoxLayout):
         self.build()
 
     def build(self):
+        '''
+        Construtor da classe ProgressInfo
+        '''
+
         status = Label(
             text=self.current_status,
             font_size=20,
