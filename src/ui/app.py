@@ -142,7 +142,7 @@ class TagMenu(StackLayout):
             size=(200, 44),
             pos_hint={'top': .9}
         )
-        menu.
+        menu._on_dropdown_select=self.show # testando resgate da opção selecionada no menu
 
         self.add_widget(updater)
         self.add_widget(menu)
@@ -150,6 +150,10 @@ class TagMenu(StackLayout):
     def tags(self):
         values = ("Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5")
         return values
+    
+    def show(self, instance, value):
+        # print(text)
+        pass
 
 
 class ProgressInfo(BoxLayout):
