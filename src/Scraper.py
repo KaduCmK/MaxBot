@@ -20,7 +20,7 @@ class Scraper:
     e controle do Whatsapp Web
     """
 
-    def __init__(self) -> None:
+    async def __init__(self) -> None:
         """
         Construtor que inicializa o chromedriver e seta o driver para o Whatsapp Web
         """

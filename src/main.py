@@ -1,11 +1,14 @@
+from ui.app import MaxBot
 from Scraper import Scraper
 
-sc = Scraper()
 
-sc.authenticateWithQRCode()
+if __name__ == "__main__":
+    MaxBot().run()
 
-# sc.coletarEtiquetas()
+    # sc = Scraper()
 
-contatos = sc.coletarContatos(5)
+    # auth_status = sc.authenticateWithQRCode()
 
-# print(f'erros: {sc.enviarMensagem(contatos, "abc")}')
+    # etiquetas = sc.coletarEtiquetas()
+
+    # contatos = sc.coletarContatos(5)

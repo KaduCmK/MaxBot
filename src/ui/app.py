@@ -1,4 +1,7 @@
+# import asyncio
+from Scraper import Scraper
 from kivy.app import App
+# from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
@@ -20,13 +23,15 @@ class MaxBot(App):
 
     Instancia a árvore de widgets do aplicativo
     """
+    
     def build(self):
         """
         Construtor da árvore de widgets do aplicativo
 
         :return: raíz da árvore de widgets
         """
-
+        self.scraper()
+        
         screen = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         upper = BoxLayout(orientation='horizontal', padding=10, spacing=10)
@@ -37,10 +42,14 @@ class MaxBot(App):
         screen.add_widget(ProgressInfo())
 
         # window = AnchorLayout(anchor_x='center', anchor_y='center')
-        window = ModalView(background='background_image.png')
+        # window = ModalView(background='background_image.png')
+        window = ModalView()
         window.add_widget(screen)
 
         return window
+    
+    async def scraper(self):
+        self.sc = await Scraper()
 
 
 class TextBox(BoxLayout):
@@ -115,13 +124,16 @@ class TagMenu(StackLayout):
         self.build()
 
     def build(self):
+        '''
+        Construtor da classe TagMenu
+        '''
+
         updater = Button(
             text='Atualizar etiquetas',
             size_hint=(1,None),
             size=(200,44),
             pos_hint={'top': 1, 'center_x': .5}
         )
-        print(self.top)
 
         menu = Spinner(
             text="Etiquetas",
@@ -130,6 +142,7 @@ class TagMenu(StackLayout):
             size=(200, 44),
             pos_hint={'top': .9}
         )
+        menu.
 
         self.add_widget(updater)
         self.add_widget(menu)
@@ -182,6 +195,10 @@ class ProgressInfo(BoxLayout):
 
 
 def edit_text(parent):
+    """
+    Funçao que instancia e abre um Popup com editor da mensagem do aplicativo
+    """
+
     content = BoxLayout(orientation='vertical', padding=10, spacing=10, size_hint=(1, 1))
     buttons = BoxLayout(orientation='horizontal', size_hint=(1, 0.2))
 
