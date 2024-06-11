@@ -2,6 +2,7 @@ import threading
 
 from Scraper import Scraper
 from kivy.app import App
+from kivy.clock import mainthread
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
@@ -13,7 +14,6 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.progressbar import ProgressBar
 from kivy.graphics import Color, Rectangle
-from kivy.clock import CyClockBase, time, mainthread
 from kivy.properties import StringProperty
 from functools import partial
 
@@ -23,7 +23,7 @@ class MaxBot(App):
 
     Instancia a árvore de widgets do aplicativo
     """
-
+    selected: StringProperty
     tags = set()
 
     def __init__(self, **kwargs):
@@ -119,8 +119,8 @@ class TagMenu(StackLayout):
     """
     Classe criadora do menu de etiquetas
     """
-
     root: MaxBot
+
     def __init__(self, root, **kwargs):
         super(TagMenu, self).__init__(orientation='tb-lr', size_hint=(0.3,1))
         self.root = root
@@ -146,7 +146,7 @@ class TagMenu(StackLayout):
             size=(200, 44),
             pos_hint={'top': .9}
         )
-        self.menu._on_dropdown_select=self.show # testando resgate da opção selecionada no menu
+        self.menu.bind(text=self.select)
 
         self.add_widget(self.updater)
         self.add_widget(self.menu)
@@ -159,9 +159,9 @@ class TagMenu(StackLayout):
         self.menu.values = tags
         
     
-    def show(self, instance, value):
-        # print(text)
-        pass
+    def select(self, instance, value):
+        self.root.selected=value
+        print(self.root.selected)
 
 
 class ProgressInfo(BoxLayout):
