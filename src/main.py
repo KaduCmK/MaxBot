@@ -15,7 +15,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.graphics import Color, Rectangle
 from kivy.clock import CyClockBase, time, mainthread
 from kivy.properties import StringProperty
-
+from functools import partial
 
 class MaxBot(App):
     """
@@ -23,6 +23,12 @@ class MaxBot(App):
 
     Instancia a árvore de widgets do aplicativo
     """
+
+    tags = set()
+
+    def __init__(self, **kwargs):
+        self.backend = Backend(self)
+        super().__init__(**kwargs)
     
     def build(self):
         """
@@ -30,16 +36,14 @@ class MaxBot(App):
 
         :return: raíz da árvore de widgets
         """
-        self.second_thread()
-        
         screen = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         upper = BoxLayout(orientation='horizontal', padding=10, spacing=10)
         upper.add_widget(TextBox())
-        upper.add_widget(TagMenu())
+        upper.add_widget(TagMenu(self))
 
         screen.add_widget(upper)
-        screen.add_widget(ProgressInfo())
+        screen.add_widget(ProgressInfo(self))
 
         # window = AnchorLayout(anchor_x='center', anchor_y='center')
         # window = ModalView(background='background_image.png')
@@ -48,15 +52,6 @@ class MaxBot(App):
 
         return window
     
-    def second_thread(self):
-        threading.Thread(target=self.call_scraper).start()
-
-    def call_scraper(self):
-        CyClockBase.schedule_once(self.start_scraper, 0)
-
-    def start_scraper(self):
-        self.sc = Scraper()
-
 
 class TextBox(BoxLayout):
     """
@@ -125,8 +120,10 @@ class TagMenu(StackLayout):
     Classe criadora do menu de etiquetas
     """
 
-    def __init__(self, **kwargs):
+    root: MaxBot
+    def __init__(self, root, **kwargs):
         super(TagMenu, self).__init__(orientation='tb-lr', size_hint=(0.3,1))
+        self.root = root
         self.build()
 
     def build(self):
@@ -134,28 +131,33 @@ class TagMenu(StackLayout):
         Construtor da classe TagMenu
         '''
 
-        updater = Button(
+        self.updater = Button(
             text='Atualizar etiquetas',
             size_hint=(1,None),
             size=(200,44),
             pos_hint={'top': 1, 'center_x': .5}
         )
+        self.updater.bind(on_release=partial(self.backendGetTags, self.updateTags))
 
-        menu = Spinner(
+        self.menu = Spinner(
             text="Etiquetas",
-            values=self.tags(),
+            values=set([""]),
             size_hint=(1,None),
             size=(200, 44),
             pos_hint={'top': .9}
         )
-        menu._on_dropdown_select=self.show # testando resgate da opção selecionada no menu
+        self.menu._on_dropdown_select=self.show # testando resgate da opção selecionada no menu
 
-        self.add_widget(updater)
-        self.add_widget(menu)
+        self.add_widget(self.updater)
+        self.add_widget(self.menu)
 
-    def tags(self):
-        values = ("Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5")
-        return values
+    def backendGetTags(self, callback, *args):
+        threading.Thread(target=self.root.backend.get_tags, args=(callback,)).start()
+
+    @mainthread
+    def updateTags(self, tags: set[str]):
+        self.menu.values = tags
+        
     
     def show(self, instance, value):
         # print(text)
@@ -170,9 +172,11 @@ class ProgressInfo(BoxLayout):
     max = 100
     current = 0
     current_status = StringProperty("Carregando")
+    root: App
 
-    def __init__(self, **kwargs):
+    def __init__(self, root, **kwargs):
         super(ProgressInfo, self).__init__(orientation='vertical', padding=10, spacing=10, size_hint=(1,0.4), **kwargs)
+        self.root = root
         self.build()
 
     def build(self):
@@ -180,8 +184,8 @@ class ProgressInfo(BoxLayout):
         Construtor da classe ProgressInfo
         '''
 
-        status = Label(
-            text=self.current_status,
+        self.status = Label(
+            text="cuzil kadu",
             font_size=20,
             size_hint=(1, None),
             halign='center',
@@ -198,10 +202,41 @@ class ProgressInfo(BoxLayout):
             size=(100,44),
             pos_hint={'center_x': .5}
         )
+        enviar.bind(on_release=partial(self.cont, self.updateStatus))
 
-        self.add_widget(status)
+        self.add_widget(self.status)
         self.add_widget(progress)
         self.add_widget(enviar)
+
+    def cont(self, callback, *args):
+        print('coleta!!!')
+        threading.Thread(target=self.root.backend.get_contacts, args=(callback,)).start()
+
+    def updateStatus(self, text):
+        self.status.text = text
+
+
+class AuthenticationScreen():
+    pass
+
+
+class Backend():
+    root: MaxBot
+
+    def __init__(self, root):
+        self.root = root
+        threading.Thread(target=self.call_scraper).start()
+
+    def call_scraper(self):
+        self.sc = Scraper()
+
+    def get_contacts(self, callback):
+        contacts = str(self.sc.coletarContatos(2))
+        callback(contacts)
+        print(contacts)
+    
+    def get_tags(self, callback):
+        callback(self.sc.coletarEtiquetas())
 
 
 def edit_text(parent):

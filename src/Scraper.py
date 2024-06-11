@@ -20,7 +20,7 @@ class Scraper:
     e controle do Whatsapp Web
     """
 
-    async def __init__(self) -> None:
+    def __init__(self) -> None:
         """
         Construtor que inicializa o chromedriver e seta o driver para o Whatsapp Web
         """
@@ -30,7 +30,7 @@ class Scraper:
         options = Options()
         options.add_argument('--headful')
         options.add_argument(f'user-data-dir={os.path.join(pathlib.Path().absolute(), "userdata")}')
-        options.add_experimental_option('detach', True)
+        # options.add_experimental_option('detach', True)
 
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, 15)
@@ -96,16 +96,18 @@ class Scraper:
         print('Coletando etiquetas...')
         self.statusString = Status.COLETANDO_ETIQUETAS
 
-        botao = self.wait.until(ec.visibility_of_element_located(
-            (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
-        botao.click()
+        # botao = self.wait.until(ec.visibility_of_element_located(
+        #     (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
+        # botao.click()
 
         # TODO: coleta de etiquetas
         # etiqueta = self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[text()="{etiqueta}"]')))
+        etiquetas = self.driver.find_elements(By.CLASS_NAME, "x9f619 x193iq5w x1y1aw1k xqmdsaz xwib8y2 xbbxn1n x6ikm8r x10wlt62")
+        print(etiquetas)
 
         self.statusString = Status.IDLE
 
-        return set()
+        return set(["etiqueta1", "etiqueta2", "etiqueta3"])
 
     def coletarContatos(self, qtdContatos: int) -> set[str]:
         """
