@@ -107,7 +107,8 @@ class Scraper:
 
         self.statusString = Status.IDLE
 
-        return set(["etiqueta1", "etiqueta2", "etiqueta3"])
+        # return set(["etiqueta1", "etiqueta2", "etiqueta3"])
+        return etiquetas
 
     def coletarContatos(self, qtdContatos: int) -> set[str]:
         """
