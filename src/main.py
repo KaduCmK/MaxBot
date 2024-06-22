@@ -3,16 +3,17 @@ import threading
 from Scraper import Scraper
 from kivy.app import App
 from kivy.clock import mainthread
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.modalview import ModalView
 from kivy.uix.textinput import TextInput
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.stacklayout import StackLayout
 from kivy.uix.progressbar import ProgressBar
+from kivy.uix.stacklayout import StackLayout
 from kivy.graphics import Color, Rectangle
 from kivy.properties import StringProperty
 from functools import partial
@@ -228,7 +229,10 @@ class Backend():
         threading.Thread(target=self.call_scraper).start()
 
     def call_scraper(self):
+        print('antes')
         self.sc = Scraper()
+        if self.sc.statusString == 2:
+            authentication_qrcode(self.sc)
 
     def get_contacts(self, callback):
         contacts = str(self.sc.coletarContatos(2))
@@ -271,6 +275,18 @@ def edit_text(parent):
     update.bind(on_press=save)
 
     editor.open()
+
+@mainthread
+def authentication_qrcode(scraper):
+    """
+    Função que cria um popup com o QR-code de autenticação
+    """
+
+    content = Image(source='res/canvas.png')
+
+    authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
+
+    authenticator.open()
 
 
 if __name__ == "__main__":
