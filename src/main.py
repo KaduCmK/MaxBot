@@ -2,18 +2,19 @@ import threading
 
 from Scraper import Scraper
 from kivy.app import App
+from kivy.clock import mainthread
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.modalview import ModalView
 from kivy.uix.textinput import TextInput
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.stacklayout import StackLayout
 from kivy.uix.progressbar import ProgressBar
+from kivy.uix.stacklayout import StackLayout
 from kivy.graphics import Color, Rectangle
-from kivy.clock import CyClockBase, time, mainthread
 from kivy.properties import StringProperty
 from functools import partial
 
@@ -23,7 +24,7 @@ class MaxBot(App):
 
     Instancia a árvore de widgets do aplicativo
     """
-
+    selected: StringProperty
     tags = set()
 
     def __init__(self, **kwargs):
@@ -119,8 +120,8 @@ class TagMenu(StackLayout):
     """
     Classe criadora do menu de etiquetas
     """
-
     root: MaxBot
+
     def __init__(self, root, **kwargs):
         super(TagMenu, self).__init__(orientation='tb-lr', size_hint=(0.3,1))
         self.root = root
@@ -146,7 +147,7 @@ class TagMenu(StackLayout):
             size=(200, 44),
             pos_hint={'top': .9}
         )
-        self.menu._on_dropdown_select=self.show # testando resgate da opção selecionada no menu
+        self.menu.bind(text=self.select)
 
         self.add_widget(self.updater)
         self.add_widget(self.menu)
@@ -159,9 +160,9 @@ class TagMenu(StackLayout):
         self.menu.values = tags
         
     
-    def show(self, instance, value):
-        # print(text)
-        pass
+    def select(self, instance, value):
+        self.root.selected=value
+        print(self.root.selected)
 
 
 class ProgressInfo(BoxLayout):
@@ -216,10 +217,6 @@ class ProgressInfo(BoxLayout):
         self.status.text = text
 
 
-class AuthenticationScreen():
-    pass
-
-
 class Backend():
     root: MaxBot
 
@@ -229,6 +226,9 @@ class Backend():
 
     def call_scraper(self):
         self.sc = Scraper()
+        if self.sc.statusString == 2:
+            # authentication_qrcode(self.sc)
+            AuthenticationScreen(self.sc)
 
     def get_contacts(self, callback):
         contacts = str(self.sc.coletarContatos(2))
@@ -237,6 +237,35 @@ class Backend():
     
     def get_tags(self, callback):
         callback(self.sc.coletarEtiquetas())
+
+
+class AuthenticationScreen():
+    @mainthread
+    def __init__(self, scraper: Scraper):
+        self.scraper = scraper
+        self.build()
+   
+    def build(self):
+        qrcode = Image(source='res/canvas.png')
+        self.message = Label(text="", size_hint=(1,None), height=50)
+
+        def check_authenticated(instance):
+            if self.scraper.statusString == 0:
+                self.authenticator.dismiss()
+
+            else:
+                self.message.text = "Não Autenticado"
+
+        button = Button(text='Close', size_hint=(1,None), height=50)
+        button.bind(on_release=check_authenticated)
+
+        content = BoxLayout(orientation='vertical')
+        content.add_widget(qrcode)
+        content.add_widget(self.message)
+        content.add_widget(button)
+
+        self.authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
+        self.authenticator.open()
 
 
 def edit_text(parent):
