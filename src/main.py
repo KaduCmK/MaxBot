@@ -217,10 +217,6 @@ class ProgressInfo(BoxLayout):
         self.status.text = text
 
 
-class AuthenticationScreen():
-    pass
-
-
 class Backend():
     root: MaxBot
 
@@ -229,10 +225,10 @@ class Backend():
         threading.Thread(target=self.call_scraper).start()
 
     def call_scraper(self):
-        print('antes')
         self.sc = Scraper()
         if self.sc.statusString == 2:
-            authentication_qrcode(self.sc)
+            # authentication_qrcode(self.sc)
+            AuthenticationScreen(self.sc)
 
     def get_contacts(self, callback):
         contacts = str(self.sc.coletarContatos(2))
@@ -241,6 +237,35 @@ class Backend():
     
     def get_tags(self, callback):
         callback(self.sc.coletarEtiquetas())
+
+
+class AuthenticationScreen():
+    @mainthread
+    def __init__(self, scraper: Scraper):
+        self.scraper = scraper
+        self.build()
+   
+    def build(self):
+        qrcode = Image(source='res/canvas.png')
+        self.message = Label(text="", size_hint=(1,None), height=50)
+
+        def check_authenticated(instance):
+            if self.scraper.statusString == 0:
+                self.authenticator.dismiss()
+
+            else:
+                self.message.text = "Não Autenticado"
+
+        button = Button(text='Close', size_hint=(1,None), height=50)
+        button.bind(on_release=check_authenticated)
+
+        content = BoxLayout(orientation='vertical')
+        content.add_widget(qrcode)
+        content.add_widget(self.message)
+        content.add_widget(button)
+
+        self.authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
+        self.authenticator.open()
 
 
 def edit_text(parent):
@@ -275,18 +300,6 @@ def edit_text(parent):
     update.bind(on_press=save)
 
     editor.open()
-
-@mainthread
-def authentication_qrcode(scraper):
-    """
-    Função que cria um popup com o QR-code de autenticação
-    """
-
-    content = Image(source='res/canvas.png')
-
-    authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
-
-    authenticator.open()
 
 
 if __name__ == "__main__":
