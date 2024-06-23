@@ -28,7 +28,7 @@ class MaxBot(App):
     tags = set()
 
     def __init__(self, **kwargs):
-        self.backend = Backend(self)
+        # self.backend = Backend(self)
         super().__init__(**kwargs)
     
     def build(self):
@@ -103,10 +103,9 @@ class TextBox(BoxLayout):
         instance.height = instance.texture_size[1]
 
     def update_rect(self, instance: ScrollView, value):
-        size = (instance.size[0]-10, instance.size[1])
         self.rectangle.size = instance.size
         self.rectangle.pos = instance.pos
-        self.text_display.text_size = size
+        self.text_display.text_size = (instance.size[0] - 10, None)
 
     def call_editor(self, instance):
         edit_text(self)
@@ -227,7 +226,6 @@ class Backend():
     def call_scraper(self):
         self.sc = Scraper()
         if self.sc.statusString == 2:
-            # authentication_qrcode(self.sc)
             AuthenticationScreen(self.sc)
 
     def get_contacts(self, callback):
