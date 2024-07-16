@@ -28,7 +28,7 @@ class MaxBot(App):
     tags = set()
 
     def __init__(self, **kwargs):
-        # self.backend = Backend(self)
+        self.backend = Backend(self)
         super().__init__(**kwargs)
     
     def build(self):
@@ -218,15 +218,18 @@ class ProgressInfo(BoxLayout):
 
 class Backend():
     root: MaxBot
+    status: int
 
     def __init__(self, root):
         self.root = root
+        self.status = 0
         threading.Thread(target=self.call_scraper).start()
 
     def call_scraper(self):
-        self.sc = Scraper()
-        if self.sc.statusString == 2:
-            AuthenticationScreen(self.sc)
+        self.sc = Scraper(self.status)
+        AuthenticationScreen(self.sc, self)
+        self.sc.authenticateWithQRCode(self.status)
+        
 
     def get_contacts(self, callback):
         contacts = str(self.sc.coletarContatos(2))
@@ -236,15 +239,21 @@ class Backend():
     def get_tags(self, callback):
         callback(self.sc.coletarEtiquetas())
 
+    def authenticate(self):
+        if self.sc.statusString == 0:
+            print('Coisaaaaaaaaaaaaaaaaaaa!')
+            AuthenticationScreen(self.sc)
+
 
 class AuthenticationScreen():
     @mainthread
-    def __init__(self, scraper: Scraper):
+    def __init__(self, scraper: Scraper, parent):
         self.scraper = scraper
-        self.build()
+        self.build(parent)
    
-    def build(self):
-        qrcode = Image(source='res/canvas.png')
+    def build(self, parent: Backend):
+        self.qrcode = Image(source='res/canvas.png')
+        self.qrcode.bind(source=self.update_image)
         self.message = Label(text="", size_hint=(1,None), height=50)
 
         def check_authenticated(instance):
@@ -254,16 +263,27 @@ class AuthenticationScreen():
             else:
                 self.message.text = "Não Autenticado"
 
+        def test(instance):
+            print("O status é ", parent.status)
+            if parent.status == 0:
+                self.authenticator.dismiss()
+
+            else:
+                self.message.text = "Não autenticado!"
+
         button = Button(text='Close', size_hint=(1,None), height=50)
-        button.bind(on_release=check_authenticated)
+        button.bind(on_release=test)
 
         content = BoxLayout(orientation='vertical')
-        content.add_widget(qrcode)
+        content.add_widget(self.qrcode)
         content.add_widget(self.message)
         content.add_widget(button)
 
         self.authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
         self.authenticator.open()
+
+    def update_image(self):
+        self.qrcode.reload()
 
 
 def edit_text(parent):

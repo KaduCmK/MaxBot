@@ -20,7 +20,7 @@ class Scraper:
     e controle do Whatsapp Web
     """
 
-    def __init__(self) -> None:
+    def __init__(self, status: int) -> None:
         """
         Construtor que inicializa o chromedriver e seta o driver para o Whatsapp Web
         """
@@ -36,9 +36,9 @@ class Scraper:
         self.wait = WebDriverWait(self.driver, 15)
         self.driver.get('https://web.whatsapp.com')
 
-        self.statusString: int = 0
+        status = 0
 
-    def authenticateWithQRCode(self) -> int:
+    def authenticateWithQRCode(self, status) -> int:
         """
         Método responsável por gerenciar a autenticação via QRCode
 
@@ -52,6 +52,7 @@ class Scraper:
         """
 
         self.statusString = Status.CARREGANDO_QR
+        status = 1
 
         c_base64 = None  # inicializa um base64 vazio
 
@@ -65,6 +66,7 @@ class Scraper:
 
             if login.tag_name == 'canvas':
                 self.statusString = Status.AGUARDANDO_AUTENTICACAO
+                status = 2
 
                 new_c_base64 = self.driver.execute_script('return arguments[0].toDataURL("image.png").substring(21);',
                                                           login)
