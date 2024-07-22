@@ -77,7 +77,7 @@ class Scraper:
                     c_base64 = new_c_base64
                     c_png = base64.b64decode(c_base64)
 
-                    with open(r'canvas.png', 'wb') as f:
+                    with open(r'res/canvas.png', 'wb') as f:
                         f.write(c_png)
                 else:
                     print('QRCodes ainda sao iguais')
@@ -103,7 +103,7 @@ class Scraper:
         # botao.click()
 
         # TODO: coleta de etiquetas
-        # etiqueta = self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[text()="{etiqueta}"]')))
+        etiqueta = self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[text()="{etiqueta}"]')))
         etiquetas = self.driver.find_elements(By.CLASS_NAME, "x9f619 x193iq5w x1y1aw1k xqmdsaz xwib8y2 xbbxn1n x6ikm8r x10wlt62")
         print(etiquetas)
 

@@ -1,8 +1,11 @@
 import threading
+from kivy.clock import Clock
 
+from Status import Status as sts
 from Scraper import Scraper
 from kivy.app import App
 from kivy.clock import mainthread
+from kivy.loader import Loader
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
@@ -169,9 +172,9 @@ class ProgressInfo(BoxLayout):
     Classe criadora da área de progresso e botão de enviar
     """
 
-    max = 100
+    max = 1
     current = 0
-    current_status = StringProperty("Carregando")
+    current_status = StringProperty("Iniciando")
     root: App
 
     def __init__(self, root, **kwargs):
@@ -185,15 +188,16 @@ class ProgressInfo(BoxLayout):
         '''
 
         self.status = Label(
-            text="cuzil kadu",
-            font_size=20,
+            text=self.current_status,
+            font_size=30,
             size_hint=(1, None),
             halign='center',
             pos_hint={'bottom': 0.1}
         )
 
         progress = ProgressBar(
-            value_normalized=0.65
+            max=self.max,
+            value=self.current
         )
 
         enviar = Button(
@@ -209,8 +213,12 @@ class ProgressInfo(BoxLayout):
         self.add_widget(enviar)
 
     def cont(self, callback, *args):
-        print('coleta!!!')
+        self.status.text=StringProperty('Coletando')
         threading.Thread(target=self.root.backend.get_contacts, args=(callback,)).start()
+
+    def sendMessenges(self, callback, *args):
+        # self.
+        pass
 
     def updateStatus(self, text):
         self.status.text = text
@@ -227,7 +235,8 @@ class Backend():
 
     def call_scraper(self):
         self.sc = Scraper(self.status)
-        AuthenticationScreen(self.sc, self)
+        # AuthenticationScreen(self.sc, self)
+        testing(self.sc, self)
         self.sc.authenticateWithQRCode(self.status)
         
 
@@ -253,8 +262,7 @@ class AuthenticationScreen():
    
     def build(self, parent: Backend):
         self.qrcode = Image(source='res/canvas.png')
-        self.qrcode.bind(source=self.update_image)
-        self.message = Label(text="", size_hint=(1,None), height=50)
+        self.message = Label(text="Coisa", size_hint=(1,None), height=50)
 
         def check_authenticated(instance):
             if self.scraper.statusString == 0:
@@ -271,19 +279,76 @@ class AuthenticationScreen():
             else:
                 self.message.text = "Não autenticado!"
 
-        button = Button(text='Close', size_hint=(1,None), height=50)
-        button.bind(on_release=test)
+        def update_image(self, parent):
+            parent.message.text = "Clicou!"
 
-        content = BoxLayout(orientation='vertical')
-        content.add_widget(self.qrcode)
-        content.add_widget(self.message)
-        content.add_widget(button)
+        self.button = Button(text='Close', size_hint=(1,None), height=50)
+        # button.bind(on_release=test)
+        self.button.bind(on_release=self.update_image)
 
-        self.authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
+        self.content = BoxLayout(orientation='vertical')
+        self.content.add_widget(self.qrcode)
+        self.content.add_widget(self.message)
+        self.content.add_widget(self.button)
+
+        self.authenticator = Popup(title='Authenticator', content=self.content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
         self.authenticator.open()
+        
 
-    def update_image(self):
-        self.qrcode.reload()
+@mainthread
+def testing(scraper: Scraper, parent):
+    qrcode = Image(source='res/canvas.png', pos_hint={'center': 0.5})
+    message = Label(text='', size_hint=(1,None), height=50)
+
+    def check_authenticated(instance):
+        if scraper.statusString == sts.IDLE:
+            # rectangle_update.cancel()
+            authenticator.dismiss()
+
+        else:
+            message.text = str(scraper.statusString)
+
+    def update_image(instance):
+        if scraper.statusString == sts.IDLE:
+            image_update.cancel()
+
+        else:
+            qrcode.reload()
+                
+    def update_rectangle(instance, value):
+        rectangle.size = qrcode.size
+        rectangle.pos = qrcode.pos
+
+
+    def update_message(instance):
+        if scraper.statusString == sts.IDLE:
+            message_update.cancel()
+            message.text = "Autenticado"
+
+        else:
+            message.text = str(scraper.statusString)
+
+
+    button = Button(text='Close', size_hint=(1,None), height=50)
+    button.bind(on_release=check_authenticated)
+    qrcode.bind(pos=update_rectangle)
+    qrcode.bind(size=update_rectangle)
+
+    content = BoxLayout(orientation='vertical')
+    content.add_widget(qrcode)
+    content.add_widget(message)
+    content.add_widget(button)
+    
+    with qrcode.canvas.before:
+        Color(1,1,1,1)
+        rectangle = Rectangle()
+
+    authenticator = Popup(title='Authenticator', content=content, size_hint=(None,None), size=(400,500), auto_dismiss=False)
+    authenticator.open()
+
+    # rectangle_update = Clock.schedule_interval(update_rectangle, 0.1)
+    image_update = Clock.schedule_interval(update_image, 2)
+    message_update = Clock.schedule_interval(update_message, 0.5)
 
 
 def edit_text(parent):

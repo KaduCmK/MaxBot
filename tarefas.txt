@@ -1,0 +1,3 @@
+-> Coleta de Etiquetas
+
+-> Implementar método para atualização da barra de status
