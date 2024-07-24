@@ -212,16 +212,22 @@ class ProgressInfo(BoxLayout):
         self.add_widget(progress)
         self.add_widget(enviar)
 
+
     def cont(self, callback, *args):
-        self.status.text=StringProperty('Coletando')
+        self.updater = Clock.schedule_interval(self.updateStatusBar, 0.5)
+        self.status.text="Coletando"
         threading.Thread(target=self.root.backend.get_contacts, args=(callback,)).start()
 
     def sendMessenges(self, callback, *args):
-        # self.
-        pass
+        self.status.text="Enviando Menssagens"
+        threading.Thread(target=self.root.backend.send_message, args=(callback,)).start()
 
     def updateStatus(self, text):
         self.status.text = text
+
+    def updateStatusBar(self):
+        if self.current == self.max:
+            self.updater.cancel()
 
 
 class Backend():
@@ -233,12 +239,20 @@ class Backend():
         self.status = 0
         threading.Thread(target=self.call_scraper).start()
 
+    def authenticate(self):
+        if self.sc.statusString == 0:
+            print('Coisaaaaaaaaaaaaaaaaaaa!')
+            AuthenticationScreen(self.sc)
+
     def call_scraper(self):
         self.sc = Scraper(self.status)
         # AuthenticationScreen(self.sc, self)
         testing(self.sc, self)
         self.sc.authenticateWithQRCode(self.status)
-        
+
+    def send_messenge(self, etiquetas):
+        self.get_contacts()
+        self.sc.enviarMensagem() 
 
     def get_contacts(self, callback):
         contacts = str(self.sc.coletarContatos(2))
@@ -247,11 +261,6 @@ class Backend():
     
     def get_tags(self, callback):
         callback(self.sc.coletarEtiquetas())
-
-    def authenticate(self):
-        if self.sc.statusString == 0:
-            print('Coisaaaaaaaaaaaaaaaaaaa!')
-            AuthenticationScreen(self.sc)
 
 
 class AuthenticationScreen():

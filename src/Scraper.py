@@ -30,7 +30,7 @@ class Scraper:
         options = Options()
         options.add_argument('--headful')
         options.add_argument(f'user-data-dir={os.path.join(pathlib.Path().absolute(), "userdata")}')
-        # options.add_experimental_option('detach', True)
+        options.add_experimental_option('detach', False)
 
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, 15)
@@ -98,13 +98,14 @@ class Scraper:
         print('Coletando etiquetas...')
         self.statusString = Status.COLETANDO_ETIQUETAS
 
-        # botao = self.wait.until(ec.visibility_of_element_located(
-        #     (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
-        # botao.click()
+        botao = self.wait.until(ec.visibility_of_element_located(
+            (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
+        botao.click()
 
         # TODO: coleta de etiquetas
-        etiqueta = self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[text()="{etiqueta}"]')))
-        etiquetas = self.driver.find_elements(By.CLASS_NAME, "x9f619 x193iq5w x1y1aw1k xqmdsaz xwib8y2 xbbxn1n x6ikm8r x10wlt62")
+        self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[@class="x1f6kntn xzwifym x1iyjqo2 xs83m0k xdl72j9 x6ikm8r x10wlt62 x1o2sk6j xlyipyv xuxw1ft x1i64zmx"]')))
+        etiquetas = self.driver.find_elements(By.XPATH, value='//span[@class="x1f6kntn xzwifym x1iyjqo2 xs83m0k xdl72j9 x6ikm8r x10wlt62 x1o2sk6j xlyipyv xuxw1ft x1i64zmx"]')
+        etiquetas = [x.text for x in etiquetas]
         print(etiquetas)
 
         self.statusString = Status.IDLE
