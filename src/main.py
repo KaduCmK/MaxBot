@@ -27,8 +27,9 @@ class MaxBot(App):
 
     Instancia a árvore de widgets do aplicativo
     """
-    selected: StringProperty
+    selected = "Nenhuma"
     tags = set()
+    contacts = set[str]
 
     def __init__(self, **kwargs):
         self.backend = Backend(self)
@@ -40,14 +41,18 @@ class MaxBot(App):
 
         :return: raíz da árvore de widgets
         """
+
+        self.textbox = TextBox()
+        self.progress = ProgressInfo(self)
+
         screen = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
         upper = BoxLayout(orientation='horizontal', padding=10, spacing=10)
-        upper.add_widget(TextBox())
+        upper.add_widget(self.textbox)
         upper.add_widget(TagMenu(self))
 
         screen.add_widget(upper)
-        screen.add_widget(ProgressInfo(self))
+        screen.add_widget(self.progress)
 
         # window = AnchorLayout(anchor_x='center', anchor_y='center')
         # window = ModalView(background='background_image.png')
@@ -63,7 +68,7 @@ class TextBox(BoxLayout):
     """
 
     # variével q guarda a mensagem atual
-    message = StringProperty("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam a aliquam odio. Quisque ultrices purus ipsum, id dignissim quam feugiat in. Pellentesque id purus non urna volutpat vehicula. Integer turpis odio, viverra at massa vel, feugiat fermentum velit. Duis quis lacus scelerisque, dictum nibh vitae, facilisis lorem. Nulla vestibulum tincidunt ante vel tincidunt. Suspendisse at iaculis est. \n\nSed vitae quam fringilla, auctor tellus vel, volutpat mi. Sed rhoncus mi et ex tincidunt sagittis. In id est nec leo auctor ullamcorper quis a tortor. Nam tristique, nunc at pretium ultrices, lorem nisl cursus velit, eu consequat diam nulla id enim. Aliquam consectetur feugiat tellus, quis vehicula orci ultricies id. Proin nec leo at velit consectetur bibendum. Maecenas in nibh sodales, elementum eros vel, facilisis augue. Integer gravida libero nec leo cursus fermentum. Phasellus volutpat ullamcorper convallis. In euismod risus faucibus mollis accumsan. Donec sed orci ut nisl ullamcorper convallis. Vestibulum bibendum condimentum elit ac aliquam.")
+    message = "Mensagem... "
     
     def __init__(self, **kwargs):
         super(TextBox, self).__init__(orientation='vertical', spacing=10, **kwargs)
@@ -161,7 +166,6 @@ class TagMenu(StackLayout):
     def updateTags(self, tags: set[str]):
         self.menu.values = tags
         
-    
     def select(self, instance, value):
         self.root.selected=value
         print(self.root.selected)
@@ -206,7 +210,7 @@ class ProgressInfo(BoxLayout):
             size=(100,44),
             pos_hint={'center_x': .5}
         )
-        enviar.bind(on_release=partial(self.cont, self.updateStatus))
+        enviar.bind(on_release=partial(self.sendMessenge, self.updateStatus))
 
         self.add_widget(self.status)
         self.add_widget(progress)
@@ -218,14 +222,13 @@ class ProgressInfo(BoxLayout):
         self.status.text="Coletando"
         threading.Thread(target=self.root.backend.get_contacts, args=(callback,)).start()
 
-    def sendMessenges(self, callback, *args):
-        self.status.text="Enviando Menssagens"
-        threading.Thread(target=self.root.backend.send_message, args=(callback,)).start()
+    def sendMessenge(self, callback, *args):
+        threading.Thread(target=self.root.backend.filter_tag, args=(callback, )).start()
 
     def updateStatus(self, text):
         self.status.text = text
 
-    def updateStatusBar(self):
+    def updateStatusBar(self, dt):
         if self.current == self.max:
             self.updater.cancel()
 
@@ -250,17 +253,31 @@ class Backend():
         testing(self.sc, self)
         self.sc.authenticateWithQRCode(self.status)
 
-    def send_messenge(self, etiquetas):
-        self.get_contacts()
-        self.sc.enviarMensagem() 
+    def filter_tag(self, callback):
+        callback("Filtrando Etiqueta")
+        tag = self.root.selected
+        
+        if self.sc.selecionarEtiqueta(tag):
+            callback("Etiquetas Selecionadas")
+            self.get_contacts(callback)
+            self.send_messenge(callback)
+
+        else:
+            callback("Falha ao Selecionar Etiquetas")
 
     def get_contacts(self, callback):
-        contacts = str(self.sc.coletarContatos(2))
-        callback(contacts)
-        print(contacts)
+        callback("Coletando Contatos")
+        contacts = self.sc.coletarContatos(1)
+        number_contacts = len(contacts)
+        callback(f"{number_contacts} contatos encontrados")
+        self.root.contacts = contacts
     
     def get_tags(self, callback):
         callback(self.sc.coletarEtiquetas())
+
+    def send_messenge(self, callback):
+        callback("Enviando Mensagens")
+        self.sc.enviarMensagem(self.root.contacts, self.root.textbox.message) 
 
 
 class AuthenticationScreen():

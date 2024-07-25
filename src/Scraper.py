@@ -108,6 +108,11 @@ class Scraper:
         etiquetas = [x.text for x in etiquetas]
         print(etiquetas)
 
+        # fechando o menu para evitar problemas de coesão com os comandos posteriores
+        botao = self.wait.until(ec.visibility_of_element_located(
+            (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
+        botao.click()
+
         self.statusString = Status.IDLE
 
         return etiquetas
@@ -130,7 +135,9 @@ class Scraper:
             botao = self.wait.until(ec.visibility_of_element_located(
             (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
             botao.click()
-            self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[@title="{etiqueta}"]')).click())
+            # self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[@title="{etiqueta}"]')).click())
+            span = self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[contains(text(), "{etiqueta}")]')))
+            span.click()
 
             return True
         except:
@@ -220,6 +227,11 @@ class Scraper:
                         scroll += 600
                     finally:
                         sleep(2)
+
+        # fechando o menu para evitar problemas de coesão com os comandos posteriores
+        botao = self.wait.until(ec.visibility_of_element_located(
+            (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
+        botao.click()
 
         self.statusString = Status.IDLE
 
