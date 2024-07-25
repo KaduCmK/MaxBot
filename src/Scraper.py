@@ -110,8 +110,32 @@ class Scraper:
 
         self.statusString = Status.IDLE
 
-        # return set(["etiqueta1", "etiqueta2", "etiqueta3"])
         return etiquetas
+
+    def selecionarEtiqueta(self, etiqueta: str) -> bool:
+        """
+        Proocura pela etiqueta fornecida e a seleciona para filtrar
+        os contatos
+
+        :param etiqueta: a etiqueta a ser clicada
+
+        :return: True quando a etiqueta for encontrada e clicada\n
+        False caso não seja encontrada ou ocorra um erro
+        """
+
+        print(f'Selecionando etiqueta {etiqueta}...')
+        # self.statusString = Status.SELECIONANDO_ETIQUETA
+
+        try:
+            botao = self.wait.until(ec.visibility_of_element_located(
+            (By.XPATH, '//button[contains(@aria-label, "Menu de filtros de conversas")]')))
+            botao.click()
+            self.wait.until(ec.visibility_of_element_located((By.XPATH, f'//span[@title="{etiqueta}"]')).click())
+
+            return True
+        except:
+            print(f'Erro ao selecionar etiqueta {etiqueta}')
+            return False
 
     def coletarContatos(self, qtdContatos: int) -> set[str]:
         """
