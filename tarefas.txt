@@ -1,1 +1,5 @@
 -> Implementar método para atualização da barra de status
+
+Num é mais fácil filtrar as etiquetas e enviar a mensagem para todos os contatos q aparecem?
+
+Com relação ao problema do qrcode tem que ver como funciona o empacotamento e como ele executa nesse estado
