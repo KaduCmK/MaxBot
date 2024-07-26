@@ -1,5 +1,8 @@
 -> Implementar método para atualização da barra de status
 
 Num é mais fácil filtrar as etiquetas e enviar a mensagem para todos os contatos q aparecem?
+    -> Necessário encontrar outra forma de identificar quando a lista de contatos filtrados foi completamente lida
+    -> Necessário criar forma de evitar que um contato seja lido mais de uma vez
 
-Com relação ao problema do qrcode tem que ver como funciona o empacotamento e como ele executa nesse estado
+Com relação ao problema do qrcode tem que ver como funciona o empacotamento e como ele executa nesse estado.
+Provavelmente está ocorrendo um missmatch entre o endereço onde o app executa e o endereço relativo onde se salva o png do qrcodes
