@@ -287,7 +287,7 @@ class AuthenticationScreen():
         self.build(parent)
    
     def build(self, parent: Backend):
-        self.qrcode = Image(source='res/canvas.png')
+        self.qrcode = Image(source='canvas.png')
         self.message = Label(text="Coisa", size_hint=(1,None), height=50)
 
         def check_authenticated(instance):
@@ -323,7 +323,7 @@ class AuthenticationScreen():
 
 @mainthread
 def testing(scraper: Scraper, parent):
-    qrcode = Image(source='res/canvas.png', pos_hint={'center': 0.5})
+    qrcode = Image(source='canvas.png', pos_hint={'center': 0.5})
     message = Label(text='', size_hint=(1,None), height=50)
 
     def check_authenticated(instance):

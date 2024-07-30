@@ -28,13 +28,15 @@ class Scraper:
         chromedriver_autoinstaller.install()
 
         options = Options()
-        options.add_argument('--headful')
+        options.add_argument('--headless')
         options.add_argument(f'user-data-dir={os.path.join(pathlib.Path().absolute(), "userdata")}')
         options.add_experimental_option('detach', False)
+        options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36')
 
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, 15)
         self.driver.get('https://web.whatsapp.com')
+        self.driver.execute_script('return navigator.userAgent')
 
         status = 0
 
@@ -77,7 +79,7 @@ class Scraper:
                     c_base64 = new_c_base64
                     c_png = base64.b64decode(c_base64)
 
-                    with open(r'res/canvas.png', 'wb') as f:
+                    with open(r'canvas.png', 'wb') as f:
                         f.write(c_png)
                 else:
                     print('QRCodes ainda sao iguais')
@@ -219,7 +221,7 @@ class Scraper:
                             By.CSS_SELECTOR, 'p.selectable-text.copyable-text.x15bjb6t.x1n2onr6'
                             )[1]
                         input.send_keys(msg)
-                        # input.send_keys(Keys.ENTER)
+                        input.send_keys(Keys.ENTER)
                     except:
                         print('Rolando...')
                         self.driver.execute_script(f'arguments[0].scrollTop = {scroll}', painel)
